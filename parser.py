@@ -57,14 +57,21 @@ def syntax_checker(input):
     if "select" not in input:
         raise KeyError("Missing Select Clause")
     
-    
     # check if numbers declared does not match up to whats provided
     n = int (input.get("n",0))
     attr = input.get("groupingAttribute","")
     attrList = [a.strip() for a in attr.split(",") if a.strip()]
-    
+    return True;
+    # check for if values in group by have no agg operations and are not a gv have been inputted in group by
 
 def process_token():
-    
+    """based on dict check for aggregate operation and handle it"""
+    action = ""
+    return action
 
-def write_output():
+def write_output(tokenDict):
+    output = ""
+    syntax_checker(tokenDict)
+    """with token from parse input and syntax checker being ran handle the token output"""
+    
+    return output
