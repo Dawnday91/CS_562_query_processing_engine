@@ -1,4 +1,5 @@
-import helper
+from helper import parseAggregate, positiveIntCheck, getFuncAgg
+
 '''Format to keep in mind
 SELECT ATTRIBUTE(S):
 cust, 1_sum_quant, 2_sum_quant, 3_sum_quant
@@ -24,21 +25,21 @@ Keywords = {
         "HAVING_CONDITION(G)":"having",
     }
 
-def parse_input(input):
+def parseInput(item):
     queryLine = {}
-    lines = [line.strip() for line in input.splitlines() if line.strip()]
+    lines = [line.strip() for line in item.splitlines() if line.strip()]
     
     i=0
     while i <len(lines):
         line = lines[i]
-        if line in ["select","groupingAttribute","f_vect"]:
+        if line in Keywords:
             key = Keywords[line]
             i+=1
             values = []
             while i < len(lines) and lines[i] not in Keywords:
                 values.append(lines[i])
                 i+=1
-            if key in Keywords:
+            if key in ['select','groupingAttribute','f_vect']:
                 queryLine[key]= [
                     item.strip() for v in values for item in v.split(",") if item.strip()
                 ]
@@ -51,27 +52,41 @@ def parse_input(input):
     return queryLine
     
     
-def syntax_checker(input):
+def syntaxCheckerNorm(item):
+    reqBase = {'select'}
+    reqGv = {"n", "groupingAttribute", "f_vect", "selectConditions", "having"}
     
-    # check if keys are missing
-    if "select" not in input:
-        raise KeyError("Missing Select Clause")
+    missing = [key for key in reqBase if not item.get(key)]
+    if missing:
+        raise KeyError(f"Missing required sections(s): {missing}")
     
-    # check if numbers declared does not match up to whats provided
-    n = int (input.get("n",0))
-    attr = input.get("groupingAttribute","")
-    attrList = [a.strip() for a in attr.split(",") if a.strip()]
-    return True;
-    # check for if values in group by have no agg operations and are not a gv have been inputted in group by
+    gv = bool(item.get("groupingAttribute"))
 
-def process_token():
-    """based on dict check for aggregate operation and handle it"""
-    action = ""
-    return action
+    if not gv:
+        return True
+
+    missingGv = [key for key in reqGv if not item.get(key)]
+    if missingGv:
+        raise KeyError(f"Missing GV section(s): {missingGv}")
+    
+    syntaxCheckerGv(item)
+    
+    return True;
+
+def syntaxCheckerGv(item):
+    n = positiveIntCheck(item['n'],'n')
+    gv = item['groupingAttribute']
+    
+    if n != len(gv):
+        raise ValueError("number of provided grouping variables does not match upto n")
+    
+    for value in item['select']:
+        if not parseAggregate(value) and value not in gv:
+            raise ValueError(f"{value} is in SELECT but not in grouping attribute section")
 
 def write_output(tokenDict):
     output = ""
-    syntax_checker(tokenDict)
-    """with token from parse input and syntax checker being ran handle the token output"""
+    syntaxCheckerNorm(tokenDict)
+    """with token from parse item and syntax checker being ran handle the token output"""
     
     return output
