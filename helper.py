@@ -43,4 +43,4 @@ def parseAggregate(item):
 
 def normalizeItems(item):
     token = parseAggregate(item)
-    return token.sql if token else item
+    return token.sqlVer if token else item

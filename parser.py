@@ -34,17 +34,20 @@ def parseInput(item):
     
     i=0
     while i <len(lines):
-        line = lines[i]
+        line = lines[i].rstrip(":")
         if line in KEYWORDS:
             key = KEYWORDS[line]
             i+=1
             values = []
-            while i < len(lines) and lines[i] not in KEYWORDS:
+            while i < len(lines) and lines[i].rstrip(":") not in KEYWORDS:
                 values.append(lines[i])
                 i+=1
             if key in ['select','groupingAttribute','f_vect']:
                 queryLine[key]= [
-                    item.strip() for v in values for item in v.split(",") if item.strip()
+                    item.strip() 
+                    for v in values 
+                    for item in v.split(",") 
+                    if item.strip()
                 ]
             elif key == "n":
                 queryLine[key] = values[0] if values else None
@@ -57,7 +60,7 @@ def parseInput(item):
     
 def syntaxCheckerNorm(item):
     reqBase = {'select'}
-    reqGv = {"n", "groupingAttribute", "f_vect", "selectConditions", "having"}
+    reqGv = {"n", "groupingAttribute", "f_vect", "suchThat", "having"}
     
     missing = [key for key in reqBase if not item.get(key)]
     if missing:
@@ -80,12 +83,26 @@ def syntaxCheckerGv(item):
     n = positiveIntCheck(item['n'],'n')
     gv = item['groupingAttribute']
     
-    if n != len(gv):
+    if n > len(ALIAS):
         raise ValueError("number of provided grouping variables does not match upto n")
     
-    for value in item['select']:
-        if not parseAggregate(value) and value not in gv:
-            raise ValueError(f"{value} is in SELECT but not in grouping attribute section")
+    if len(item.get("suchThat", [])) != n:
+        raise ValueError(
+            f"n={n}, but found {len(item.get('suchThat', []))} such-that condition(s)"
+        )
+
+    for value in item["select"]:
+        token = parseAggregate(value)
+
+        if token:
+            if token.gv < 1 or token.gv > n:
+                raise ValueError(
+                    f"{value} uses grouping variable {token.gv}, but n={n}"
+                )
+        elif value not in gv:
+            raise ValueError(
+                f"{value} is in SELECT but not in grouping attribute section"
+            )
 
 def write_output(tokenDict):
     output = []
@@ -93,7 +110,7 @@ def write_output(tokenDict):
     """with token from parse item and syntax checker being ran handle the token output"""
     selectInput = [normalizeItems(item) for item in tokenDict["select"]]
     output.append(f"select: {', '.join(selectInput)}")
-    output.append("from: sales")
+    output.append("from sales")
     if tokenDict.get("where"):
         output.append(f"where {' '.join(tokenDict['where'])}")
     if tokenDict.get("groupingAttribute"):
@@ -104,7 +121,7 @@ def write_output(tokenDict):
     if tokenDict.get("suchThat"):
         conditions = []
         
-        for i, cond in enumerate(tokenDict["selectConditions"],start=1):
+        for i, cond in enumerate(tokenDict["suchThat"],start=1):
             alias = ALIAS[i]
             conditions.append(cond.replace(f"{i}.",f"{alias}."))
         output.append(f"such that {conditions[0]}")
@@ -117,7 +134,7 @@ def write_output(tokenDict):
         for aggr in tokenDict["f_vect"]:
             token = parseAggregate(aggr)
             if token:
-                attr = attr.replace(token.original,token.sqlVer)
-        output.append(f"having: {attr};")
+                attr = attr.replace(aggr,token.sqlVer)
+        output.append(f"having {attr};")
     
     return "\n".join(output)
