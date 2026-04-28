@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 VALID_AGG = {"sum", "avg", "count", "min", "max"}
+ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
 
 @dataclass
 class AggregateToken:
     gv: int
     func: str
     attr: str
-
+    sqlVer: str
+    
 def positiveIntCheck(value, field_name):
     try:
         number = int(value)
@@ -32,8 +34,13 @@ def parseAggregate(item):
     if func not in VALID_AGG:
         raise ValueError(f"Invalid aggregate function: {func}")
     
-    return AggregateToken(gv, func, attr)
+    if gv not in ALIAS:
+        raise ValueError(f"No defined letter for gv: {gv}")
+    
+    sqlVer = f"{func}({ALIAS[gv]}.{attr})" 
+    
+    return AggregateToken(gv, func, attr,sqlVer)
 
-def getFuncAgg(item):
-    parsed = parseAggregate(item)
-    return parsed.func if parsed else None
+def normalizeItems(item):
+    token = parseAggregate(item)
+    return token.sql if token else item

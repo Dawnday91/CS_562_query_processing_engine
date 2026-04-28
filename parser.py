@@ -1,4 +1,4 @@
-from helper import parseAggregate, positiveIntCheck, getFuncAgg
+from helper import parseAggregate, positiveIntCheck, normalizeItems
 
 '''Format to keep in mind
 SELECT ATTRIBUTE(S):
@@ -16,12 +16,15 @@ SELECT CONDITION-VECT([σ]):
 HAVING_CONDITION(G):
 1_sum_quant > 2 * 2_sum_quant or 1_avg_quant > 3_avg_quant'''
 
-Keywords = {
+ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
+KEYWORDS = {
         "SELECT ATTRIBUTE(S)":"select",
+        "FROM":"from",
+        "WHERE":"where",
         "NUMBER OF GROUPING VARIABLES(n)":"n",
         "GROUPING ATTRIBUTES(V)":"groupingAttribute",
         "F-VECT([F])":"f_vect",
-        "SELECT CONDITION-VECT([σ])":"selectConditions",
+        "SELECT CONDITION-VECT([σ])":"suchThat",
         "HAVING_CONDITION(G)":"having",
     }
 
@@ -32,11 +35,11 @@ def parseInput(item):
     i=0
     while i <len(lines):
         line = lines[i]
-        if line in Keywords:
-            key = Keywords[line]
+        if line in KEYWORDS:
+            key = KEYWORDS[line]
             i+=1
             values = []
-            while i < len(lines) and lines[i] not in Keywords:
+            while i < len(lines) and lines[i] not in KEYWORDS:
                 values.append(lines[i])
                 i+=1
             if key in ['select','groupingAttribute','f_vect']:
@@ -85,8 +88,36 @@ def syntaxCheckerGv(item):
             raise ValueError(f"{value} is in SELECT but not in grouping attribute section")
 
 def write_output(tokenDict):
-    output = ""
+    output = []
     syntaxCheckerNorm(tokenDict)
     """with token from parse item and syntax checker being ran handle the token output"""
+    selectInput = [normalizeItems(item) for item in tokenDict["select"]]
+    output.append(f"select: {', '.join(selectInput)}")
+    output.append("from: sales")
+    if tokenDict.get("where"):
+        output.append(f"where {' '.join(tokenDict['where'])}")
+    if tokenDict.get("groupingAttribute"):
+        n = int(tokenDict['n'])
+        aliases = [ALIAS[i] for i in range(1,n+1)]
+        output.append(f"group by {', '.join(tokenDict['groupingAttribute'])}: {', '.join(aliases)}")
+
+    if tokenDict.get("suchThat"):
+        conditions = []
+        
+        for i, cond in enumerate(tokenDict["selectConditions"],start=1):
+            alias = ALIAS[i]
+            conditions.append(cond.replace(f"{i}.",f"{alias}."))
+        output.append(f"such that {conditions[0]}")
+        for cond in conditions[1:]:
+            output.append(f"and {cond}")
+            
+    if tokenDict.get("having"):
+        attr = tokenDict["having"][0]
+        
+        for aggr in tokenDict["f_vect"]:
+            token = parseAggregate(aggr)
+            if token:
+                attr = attr.replace(token.original,token.sqlVer)
+        output.append(f"having: {attr};")
     
-    return output
+    return "\n".join(output)
