@@ -1,4 +1,4 @@
-from helper import parseAggregate, positiveIntCheck, normalizeItems
+from helper import parseAggregate, positiveIntCheck, normalizeItems, suchthatStruct, havingStruct
 
 ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
 KEYWORDS = {
@@ -24,9 +24,6 @@ KEYWORDS = {
 def parseInput(item):
     queryLine = {}
     lines = [line.strip() for line in item.splitlines() if line.strip()]
-    print("aaa")
-    print(lines)
-    print("bbb")
     i=0
     while i <len(lines):
         line = lines[i].rstrip(":")
@@ -44,6 +41,10 @@ def parseInput(item):
                     for item in v.split(",") 
                     if item.strip()
                 ]
+            elif key in ['suchThat']:
+                queryLine[key] = (suchthatStruct(v) for v in values)
+            elif key in ['having']:
+                queryLine[key] = (havingStruct(v) for v in values)
             elif key == "n":
                 queryLine[key] = values[0] if values else None
             else: 

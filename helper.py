@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 VALID_AGG = {"sum", "avg", "count", "min", "max"}
 ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
@@ -44,3 +45,9 @@ def parseAggregate(item):
 def normalizeItems(item):
     token = parseAggregate(item)
     return token.sqlVer if token else item
+
+def suchthatStruct(item):
+    return re.sub(r"^(\d+)\.([a-zA-Z_]\w*)",r'row["\2"]',item)
+    
+def havingStruct(item):
+    return re.sub(r"^\d+_[a-zA-Z_]\w*",r'value._\1*$',item)
