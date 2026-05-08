@@ -15,9 +15,9 @@ KEYWORDS = {
 def parseInput(item):
     queryLine = {}
     lines = [line.strip() for line in item.splitlines() if line.strip()]
-    print("aaa")
-    print(lines)
-    print("bbb")
+    #print("aaa")
+    #print(lines)
+    #print("bbb")
     i=0
     while i <len(lines):
         line = lines[i].rstrip(":")

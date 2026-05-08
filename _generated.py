@@ -1,6 +1,6 @@
 
 #test test hello
-['cust', '1_avg_price', '2_sum_quant', '3_min_quant']
+['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant']
 import os
 import psycopg2
 import psycopg2.extras
@@ -54,7 +54,7 @@ def query():
 
     
     class Row:
-        def __init__(self,_1_avg_price=None,_2_sum_quant=None,_3_min_quant=None):
+        def __init__(self,_1_avg_price=0,_2_sum_quant=0,_3_min_quant=float('inf')):
             self._1_avg_price = _1_avg_price
             self._2_sum_quant = _2_sum_quant
             self._3_min_quant = _3_min_quant
@@ -93,7 +93,7 @@ def query():
     for row in rows:
         for key, value in mfTable.items():
             if key.cust == row['cust'] and key.prod == row['prod']:
-                if row["state"]=='CT':
+                if row['state'] == 'CT':
                     value.sum += row["quant"]
                     value.count += 1
                     value._1_avg_price = value.sum / value.count
@@ -110,7 +110,7 @@ def query():
     for row in rows:
         for key, value in mfTable.items():
             if key.cust == row['cust'] and key.prod == row['prod']:
-                if row["state"]=='NY':
+                if row['quant'] > value._1_avg_price:
                     value.sum += row["quant"]
                     value._2_sum_quant = value.sum
                     #return
@@ -126,7 +126,7 @@ def query():
     for row in rows:
         for key, value in mfTable.items():
             if key.cust == row['cust'] and key.prod == row['prod']:
-                if row["state"]=='NJ':
+                if row['state'] == 'NJ':
                     value.min = min(value.min, row["quant"])
                     value._3_min_quant = value.min
                     #return
@@ -134,7 +134,7 @@ def query():
     #having
     theOutput = []
     for key, value in mfTable.items():
-        if value._2_sum_quant > 100 or value._1_avg_price < 50 and value._3_min_quant >= 5:
+        if value._2_sum_quant > 0:
             theOutput.append((key, value))
 
     outputFR = []

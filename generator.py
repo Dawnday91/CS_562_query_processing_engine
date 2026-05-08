@@ -1,7 +1,59 @@
 import subprocess
+#old test input you gave me. 
+#  from is implied to the expression and so we assume it's always sales. it should be removed
+#  where is supposed to be combined over every such that clause because it's implicit to every grouping attribute
+#  each of the fields are in a very annoying form. I did a minor rewrite of them because it will be easier to translate in the parser than to decode here.
+#input = {
+#   'select': ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'], 
+#   'from': ['sales'], 
+#   'where': ["year = 2023 and region = 'east'"],
+#   'n': '3', 'groupingAttribute': ['cust', 'prod'], 
+#   'f_vect': ['1_avg_price', '2_sum_quant', '3_min_quant'], 
+#   'suchThat': ["1.state='CT'", "2.state='NY'", "3.state='NJ'"], 
+#   'having': ['2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5']}
+"""
+the most important change is that what you set suchThat and having to is correct injectable code. 
+    no matter what, add the "row[blah]" stuff to every feature for suchThat
+      and
+    value._ to every f_vect in having
 
-input = {'select': ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'], 'from': ['sales'], 'where': ["year = 2023 and region = 'east'"], 'n': '3', 'groupingAttribute': ['cust', 'prod'], 'f_vect': ['1_avg_price', '2_sum_quant', '3_min_quant'], 'suchThat': ["1.state='CT'", "2.state='NY'", "3.state='NJ'"], 'having': ['2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5']}
+"""
+#ideal input below
+#input = {
+#    'select': ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'],  
+#    'n': '3', 
+#   'groupingAttribute': ['cust', 'prod'], 
+#  'f_vect': ['1_avg_price', '2_sum_quant', '3_min_quant'], 
+# 'suchThat': ["row['year'] == 2023 and row['region'] == 'east' and row['state'] == 'CT'",
+#            "row['year'] == 2023 and row['region'] == 'east' and row['state'] == 'NY'",
+#           "row['year'] == 2023 and row['region'] == 'east' and row['state'] == 'NJ'"], 
+#    'having': 'value._2_sum_quant > 100 or value._1_avg_price < 50 and value._3_min_quant >= 5'}
+#note that this will not run because the where clause is incompatible with the sales schema, this is just example
 
+#actual working function that demonstrates how it should look
+input = {
+    'select': ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'],  
+    'n': '3', 
+    'groupingAttribute': ['cust', 'prod'], 
+    'f_vect': ['1_avg_price', '2_sum_quant', '3_min_quant'], 
+    'suchThat': ["row['day'] > 1 and row['month'] == 1 and row['state'] == 'CT'",
+                "row['day'] > 1 and row['month'] == 1 and row['state'] == 'NY'",
+                "row['day'] > 1 and row['month'] == 1 and row['state'] == 'NJ'"], 
+    'having': 'value._2_sum_quant > 100 or value._1_avg_price < 50 and value._3_min_quant >= 5'}
+
+#new test input to compare to previously calculated aggregates
+input = {
+    'select': ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'],
+    'n': '3',
+    'groupingAttribute': ['cust', 'prod'],
+    'f_vect': ['1_avg_price', '2_sum_quant', '3_min_quant'],
+    'suchThat': [
+        "row['state'] == 'CT'",
+        "row['quant'] > value._1_avg_price",
+        "row['state'] == 'NJ'"
+    ],
+    'having': 'value._2_sum_quant > 0'
+}
 
 def generate(aggType, iVal, vectVal):
     output = f"""
@@ -23,7 +75,7 @@ def generate(aggType, iVal, vectVal):
     for row in rows:
         for key, value in mfTable.items():
             if {conds}:
-                if row["{input["suchThat"][iVal][2:]}"]:
+                if {input["suchThat"][iVal]}:
                     value.sum += row["quant"]
                     value.count += 1
                     value._{vectVal} = value.sum / value.count
@@ -39,7 +91,7 @@ def generate(aggType, iVal, vectVal):
     for row in rows:
         for key, value in mfTable.items():
             if {conds}:
-                if row["{input["suchThat"][iVal][2:]}"]:
+                if {input["suchThat"][iVal]}:
                     value.sum += row["quant"]
                     value._{vectVal} = value.sum
                     #return
@@ -54,7 +106,7 @@ def generate(aggType, iVal, vectVal):
     for row in rows:
         for key, value in mfTable.items():
             if {conds}:
-                if row["{input["suchThat"][iVal][2:]}"]:
+                if {input["suchThat"][iVal]}:
                     value.count ++
                     value._{vectVal} = value.count
                     #return
@@ -70,7 +122,7 @@ def generate(aggType, iVal, vectVal):
     for row in rows:
         for key, value in mfTable.items():
             if {conds}:
-                if row["{input["suchThat"][iVal][2:]}"]:
+                if {input["suchThat"][iVal][2:]}:
                     value.max = max(value.max, row["quant"])
                     value._{vectVal} = value.max
                     #return
@@ -86,7 +138,7 @@ def generate(aggType, iVal, vectVal):
     for row in rows:
         for key, value in mfTable.items():
             if {conds}:
-                if row["{input["suchThat"][iVal][2:]}"]:
+                if {input["suchThat"][iVal]}:
                     value.min = min(value.min, row["quant"])
                     value._{vectVal} = value.min
                     #return
@@ -132,8 +184,20 @@ def main():
     class Row:
         def __init__(self,"""
     for agg in input["f_vect"]:
+        aggType = agg.split("_", 1)[1].split("_")[0]
+        match aggType:
+            case "avg":
+                me = "0"
+            case "sum":
+                me = "0"
+            case "count":
+                me = "0"
+            case "min":
+                me = "float('inf')"
+            case "max":
+                me = "float('-inf')"
         safe_name = "_" + agg   # prefix with underscore so it's a valid Python identifier
-        rowDef += f"{safe_name}=None,"
+        rowDef += f"{safe_name}={me},"
     rowDef = rowDef[:-1] + "):\n"
 
     for agg in input["f_vect"]:
