@@ -39,7 +39,7 @@ def main():
     F-VECT([F]):
     1_avg_price, 2_sum_quant, 3_min_quant
     SELECT CONDITION-VECT([σ]):
-    1.state='CA'
+    1.state='CA' AND prod='banana'
     2.state='TX'
     3.state='FL'
     HAVING_CONDITION(G):
