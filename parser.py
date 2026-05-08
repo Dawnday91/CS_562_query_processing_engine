@@ -130,3 +130,62 @@ def write_output(tokenDict):
         output.append(f"having {attr};")
     
     return "\n".join(output)
+
+
+def UserInput():
+    print ("Choose input method:")
+    print ("1) Manual Input")
+    print ("2) File Input")
+    choice = input("Input option (1 or 2):").strip()
+    
+    if choice == "1":
+        print("Paste your query below.")
+        print("Type END on a new line when finished:\n")
+
+        lines = []
+
+        while True:
+            line = input()
+
+            if line.strip().upper() == "END":
+                break
+
+            lines.append(line)
+
+        queryText = '\n'.join(lines).strip()
+        
+        if not queryText:
+            return tuple()
+
+        return (parseInput(queryText),)
+    
+    elif choice == "2":
+        path = input("Enter file path: ").strip()
+
+        try:
+            queries = []
+            currentQuery = []
+            with open(path, "r", encoding="utf-8") as file:
+                for line in file:
+                    if line.strip().upper()=='END':
+                        queryText = "\n".join(currentQuery).strip()
+                        
+                        if queryText:
+                            queries.append(parseInput(queryText))
+                    
+                        currentQuery = []
+                    else:
+                        currentQuery.append(line.rstrip("\n"))
+                
+            if currentQuery:
+                queryText = '\n'.join(currentQuery).strip()
+                if queryText:
+                    queries.append(parseInput(queryText))
+        
+            return tuple(queries)
+
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Could not find file: {path}")
+
+    else:
+        raise ValueError("Invalid option selected")
