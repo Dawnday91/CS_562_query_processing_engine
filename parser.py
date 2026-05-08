@@ -1,21 +1,5 @@
 from helper import parseAggregate, positiveIntCheck, normalizeItems
 
-'''Format to keep in mind
-SELECT ATTRIBUTE(S):
-cust, 1_sum_quant, 2_sum_quant, 3_sum_quant
-NUMBER OF GROUPING VARIABLES(n):
-3
-GROUPING ATTRIBUTES(V):
-cust
-F-VECT([F]):
-1_sum_quant, 1_avg_quant, 2_sum_quant, 3_sum_quant, 3_avg_quant
-SELECT CONDITION-VECT([σ]):
-1.state=’NY’
-2.state=’NJ’
-3.state=’CT’
-HAVING_CONDITION(G):
-1_sum_quant > 2 * 2_sum_quant or 1_avg_quant > 3_avg_quant'''
-
 ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
 KEYWORDS = {
         "SELECT ATTRIBUTE(S)":"select",
