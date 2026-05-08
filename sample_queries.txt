@@ -1,7 +1,5 @@
  SELECT ATTRIBUTE(S):
     cust, 1_avg_price, 2_sum_quant, 3_min_quant
-
-    year = 2023 and region = 'east'
     NUMBER OF GROUPING VARIABLES(n):
     3
     GROUPING ATTRIBUTES(V):
@@ -19,7 +17,6 @@
 
  SELECT ATTRIBUTE(S):
     cust, 1_avg_price, 2_sum_quant, 3_min_quant
-    year = 2023 and region = 'east'
     NUMBER OF GROUPING VARIABLES(n):
     3
     GROUPING ATTRIBUTES(V):

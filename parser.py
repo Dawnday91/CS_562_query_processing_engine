@@ -41,10 +41,16 @@ def parseInput(item):
                     for item in v.split(",") 
                     if item.strip()
                 ]
-            elif key in ['suchThat']:
-                queryLine[key] = (suchthatStruct(v) for v in values)
-            elif key in ['having']:
-                queryLine[key] = (havingStruct(v) for v in values)
+            elif key == "suchThat":
+                queryLine[key] = [
+                    suchthatStruct(v)
+                    for v in values
+                ]
+            elif key == "having":
+                queryLine[key] = [
+                    havingStruct(v)
+                    for v in values
+                ]
             elif key == "n":
                 queryLine[key] = values[0] if values else None
             else: 
@@ -78,9 +84,6 @@ def syntaxCheckerNorm(item):
 def syntaxCheckerGv(item):
     n = positiveIntCheck(item['n'],'n')
     gv = item['groupingAttribute']
-    
-    if n > len(ALIAS):
-        raise ValueError("number of provided grouping variables does not match upto n")
     
     if len(item.get("suchThat", [])) != n:
         raise ValueError(
@@ -124,13 +127,7 @@ def write_output(tokenDict):
             output.append(f"and {cond}")
             
     if tokenDict.get("having"):
-        attr = tokenDict["having"][0]
-        
-        for aggr in tokenDict["f_vect"]:
-            token = parseAggregate(aggr)
-            if token:
-                attr = attr.replace(aggr,token.sqlVer)
-        output.append(f"having {attr};")
+        output.append(f"having {tokenDict['having'][0]};")
     
     return "\n".join(output)
 

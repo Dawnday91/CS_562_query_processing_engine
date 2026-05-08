@@ -1,14 +1,14 @@
 import re
 from dataclasses import dataclass
 VALID_AGG = {"sum", "avg", "count", "min", "max"}
-ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
 
 @dataclass
 class AggregateToken:
     gv: int
     func: str
     attr: str
-    sqlVer: str
+    genVer: str
+    raw: str
     
 def positiveIntCheck(value, field_name):
     try:
@@ -23,6 +23,7 @@ def positiveIntCheck(value, field_name):
 
 
 def parseAggregate(item):
+    raw = item
     parts = item.split("_")
     
     if len(parts) != 3 or not parts[0].isdigit():
@@ -35,19 +36,20 @@ def parseAggregate(item):
     if func not in VALID_AGG:
         raise ValueError(f"Invalid aggregate function: {func}")
     
-    if gv not in ALIAS:
-        raise ValueError(f"No defined letter for gv: {gv}")
+    genVer = f"values._{gv}_{func}_{attr}"
     
-    sqlVer = f"{func}({ALIAS[gv]}.{attr})" 
-    
-    return AggregateToken(gv, func, attr,sqlVer)
+    return AggregateToken(gv, func, attr,genVer, raw)
 
 def normalizeItems(item):
     token = parseAggregate(item)
-    return token.sqlVer if token else item
+    return token.genVer if token else item
 
 def suchthatStruct(item):
-    return re.sub(r"^(\d+)\.([a-zA-Z_]\w*)",r'row["\2"]',item)
-    
+    return re.sub(r"(\d+)\.([a-zA-Z_]\w*)",r'row["\2"]',item)
+
 def havingStruct(item):
-    return re.sub(r"^\d+_[a-zA-Z_]\w*",r'value._\1*$',item)
+    return re.sub(
+        r"\b\d+_[A-Za-z]+_[A-Za-z_]\w*\b",
+        lambda m: normalizeItems(m.group(0)),
+        item
+    )
