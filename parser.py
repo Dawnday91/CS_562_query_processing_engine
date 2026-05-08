@@ -106,29 +106,22 @@ def syntaxCheckerGv(item):
 def write_output(tokenDict):
     output = []
     syntaxCheckerNorm(tokenDict)
-    """with token from parse item and syntax checker being ran handle the token output"""
-    selectInput = [normalizeItems(item) for item in tokenDict["select"]]
-    output.append(f"select: {', '.join(selectInput)}")
+
+    output.append(f"select {', '.join(tokenDict['select'])}")
     output.append("from sales")
     output.append("where ,")
+
     if tokenDict.get("groupingAttribute"):
-        n = int(tokenDict['n'])
-        aliases = [ALIAS[i] for i in range(1,n+1)]
-        output.append(f"group by {', '.join(tokenDict['groupingAttribute'])}: {', '.join(aliases)}")
+        output.append(f"group by {', '.join(tokenDict['groupingAttribute'])}")
 
     if tokenDict.get("suchThat"):
-        conditions = []
-        
-        for i, cond in enumerate(tokenDict["suchThat"],start=1):
-            alias = ALIAS[i]
-            conditions.append(cond.replace(f"{i}.",f"{alias}."))
-        output.append(f"such that {conditions[0]}")
-        for cond in conditions[1:]:
+        output.append(f"such that {tokenDict['suchThat'][0]}")
+        for cond in tokenDict["suchThat"][1:]:
             output.append(f"and {cond}")
-            
+
     if tokenDict.get("having"):
         output.append(f"having {tokenDict['having'][0]};")
-    
+
     return "\n".join(output)
 
 
