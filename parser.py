@@ -3,14 +3,23 @@ from helper import parseAggregate, positiveIntCheck, normalizeItems
 ALIAS = {1:"x",2:"y",3:"z",4:"a",5:"b"}
 KEYWORDS = {
         "SELECT ATTRIBUTE(S)":"select",
-        "FROM":"from",
-        "WHERE":"where",
         "NUMBER OF GROUPING VARIABLES(n)":"n",
         "GROUPING ATTRIBUTES(V)":"groupingAttribute",
         "F-VECT([F])":"f_vect",
         "SELECT CONDITION-VECT([σ])":"suchThat",
         "HAVING_CONDITION(G)":"having",
     }
+
+#input = {
+#    'select': ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'],  
+#    'n': '3', 
+#   'groupingAttribute': ['cust', 'prod'], 
+#  'f_vect': ['1_avg_price', '2_sum_quant', '3_min_quant'], 
+# 'suchThat': ["row['year'] == 2023 and row['region'] == 'east' and row['state'] == 'CT'",
+#            "row['year'] == 2023 and row['region'] == 'east' and row['state'] == 'NY'",
+#           "row['year'] == 2023 and row['region'] == 'east' and row['state'] == 'NJ'"], 
+#    'having': 'value._2_sum_quant > 100 or value._1_avg_price < 50 and value._3_min_quant >= 5'}
+#note that this will not run because the where clause is incompatible with the sales schema, this is just example
 
 def parseInput(item):
     queryLine = {}
@@ -95,8 +104,7 @@ def write_output(tokenDict):
     selectInput = [normalizeItems(item) for item in tokenDict["select"]]
     output.append(f"select: {', '.join(selectInput)}")
     output.append("from sales")
-    if tokenDict.get("where"):
-        output.append(f"where {' '.join(tokenDict['where'])}")
+    output.append("where ,")
     if tokenDict.get("groupingAttribute"):
         n = int(tokenDict['n'])
         aliases = [ALIAS[i] for i in range(1,n+1)]
