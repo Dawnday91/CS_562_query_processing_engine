@@ -69,8 +69,10 @@ def query():
             return f"Row({attrs})"
 
 
-    mfValue = [0, 0, 0]
+    mfValue = [0, 0, 0] 
     #int n = 3
+
+    #generate mf table
 
     for row in rows:
         #key = tuple(generateKey(groupingAttributes, row))
@@ -92,9 +94,9 @@ def query():
     #avg
     for row in rows:
         for key, value in mfTable.items():
-            if key.cust == row['cust'] and key.prod == row['prod']:
-                if row['state'] == 'CT':
-                    value.sum += row["quant"]
+            if key.cust == row['cust'] and key.prod == row['prod']: #if row matches key
+                if row['state'] == 'CT': #if we satisfy suchThat
+                    value.sum += row["quant"] #compute aggregate
                     value.count += 1
                     value._1_avg_price = value.sum / value.count
                     #return

@@ -54,7 +54,7 @@ input = {
     ],
     'having': 'value._2_sum_quant > 0'
 }
-
+#this function computes a single loop for one grouping variable. aggType = "avg","sum","etc." iVal is the grouping variable index. vectVal is the name of the field itself
 def generate(aggType, iVal, vectVal):
     output = f"""
             
@@ -66,7 +66,7 @@ def generate(aggType, iVal, vectVal):
     """
     match aggType:
         case "avg":
-            conds = " and ".join(
+            conds = " and ".join( #make sure that the row matches the mf table key
                 f"key.{attr} == row['{attr}']"
                 for attr in input["groupingAttribute"]
             )
@@ -74,9 +74,9 @@ def generate(aggType, iVal, vectVal):
     #avg
     for row in rows:
         for key, value in mfTable.items():
-            if {conds}:
-                if {input["suchThat"][iVal]}:
-                    value.sum += row["quant"]
+            if {conds}: #if row matches key
+                if {input["suchThat"][iVal]}: #if we satisfy suchThat
+                    value.sum += row["quant"] #compute aggregate
                     value.count += 1
                     value._{vectVal} = value.sum / value.count
                     #return
@@ -160,6 +160,7 @@ def main():
         mfValue += "0, "
     mfValue = mfValue[:-2] + "]";
 
+    #key for our mf table. contains grouping attributes
     keyDef = f"""
     class Key:
         def __init__(self, """
@@ -179,7 +180,7 @@ def main():
         def __hash__(self):
             return hash(tuple(self.__dict__.values()))
     """
-
+    #value for mf table. contains grouping variables
     rowDef = f"""
     class Row:
         def __init__(self,"""
@@ -225,8 +226,10 @@ def main():
 
     {rowDef}
 
-    mfValue = {mfValue}
+    mfValue = {mfValue} 
     #int n = {input["n"]}
+
+    #generate mf table
 
     for row in rows:
         #key = tuple(generateKey(groupingAttributes, row))
@@ -238,7 +241,7 @@ def main():
 
 
     """
-    parsed = []
+    #loop through and generate our scans for each grouping variable.
     for vect in input["f_vect"]:
         parts = vect.split("_", 1)   # ["1", "avg_price"]
         iVal = int(parts[0]) - 1    # grouping variable index (0-based)
@@ -252,7 +255,7 @@ def main():
     
     #body += generate("min", 1, "2_sum_quant")
 
-    
+    #final part for the having clause and output
     body += f"""
     #having
     theOutput = []
