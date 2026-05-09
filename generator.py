@@ -54,6 +54,44 @@ input = {
     ],
     'having': 'value._2_sum_quant > 0'
 }
+
+#sample query 1
+#for each customer, get the customer, average quant where state is NY, and average quanti where state is NJ
+input = {'select': ['cust', '1_avg_quant', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['cust'], 'f_vect': ['1_avg_quant', '2_avg_quant'], 'suchThat': ['row["state"] == \'NY\'', 'row["state"] == \'NJ\''], 'having': ['TRUE']}
+#sample query 2
+#for each product, compute the sum of sales when the day is after the 10th, the count of sales when the month is the 7th, and the minimum of sales when the year is before 2018
+input = {'select': ['prod', '1_sum_sales', '2_count_sales', '3_min_sales'], 'n': '3', 'groupingAttribute': ['prod'], 'f_vect': ['1_sum_sales', '2_count_sales', '3_min_sales'], 'suchThat': ['row["day"] > 10', 'row["month"] == 7', 'row["year"] < 2018'], 'having': ['TRUE']}
+
+#sample query 3
+#for each product bought by the customer "Dan", compute the average quant of sales in new york, the average quant of sales in the first half of the year, and the product
+input = {'select': ['prod', '1_avg_quant', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['prod'], 'f_vect': ['1_avg_quant', '2_avg_quant'], 'suchThat': ['row["cust"] == \'Dan\' and row["state"] == \'NY\'', 'row["cust"] == \'Dan\' and row["month"] <= 6'], 'having': ['TRUE']}
+
+#sample query 4
+#for each customer, product pair, compute the average quant of sales in new york, and the average quant for sales in january
+input = {'select': ['cust', 'prod', '1_avg_quant', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['cust', 'prod'], 'f_vect': ['1_avg_quant', '2_avg_quant'], 'suchThat': ['row["state"]==\'NY\'', 'row["month"]==1'], 'having': ['TRUE']}
+
+#sample query 5
+#for each product and customer in new york, compute the count of sales and the average quant of sales for pairs that have an average price of at least 100
+input = {'select': ['prod', 'cust', '1_count_sales', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['prod', 'cust'], 'f_vect': ['1_count_sales', '2_avg_quant'], 'suchThat': ['row["state"]==\'NY\'', 'row["state"]==\'NY\''], 'having': ['values._2_avg_quant >= 100']}
+
+#sample query 6
+#for each customer product combination in new york, compute the average quant of sales and then the minimum quant of sales that are higher than that computed average, then output the rows that have that average quant of at least 200
+#THIS IS WRONG. THE OUTPUT IS NOT ADDING THE 'value._' TO EVERYTHING
+#incorrect output from program
+input = {'select': ['cust', 'prod', '1_avg_quant', '2_min_quant'], 
+         'n': '2', 'groupingAttribute': ['cust', 'prod'], 
+         'f_vect': ['1_avg_quant', '2_min_quant'], 
+         'suchThat': ['row["state"]==\'NY\'', 
+                      'row["state"]==\'NY\' and row["quant"] > 1_avg_quant'], 
+        'having': ['1_avg_quant_ny >= 200']}
+#what it should be
+input = {'select': ['cust', 'prod', '1_avg_quant', '2_min_quant'], 
+         'n': '2', 'groupingAttribute': ['cust', 'prod'], 
+         'f_vect': ['1_avg_quant', '2_min_quant'], 
+         'suchThat': ['row["state"]==\'NY\'', 
+                      'row["state"]==\'NY\' and row["quant"] > value._1_avg_quant'], 
+        'having': ['1_avg_quant_ny >= 200']}
+
 #this function computes a single loop for one grouping variable. aggType = "avg","sum","etc." iVal is the grouping variable index. vectVal is the name of the field itself
 def generate(aggType, iVal, vectVal):
     output = f"""
@@ -70,6 +108,7 @@ def generate(aggType, iVal, vectVal):
                 f"key.{attr} == row['{attr}']"
                 for attr in input["groupingAttribute"]
             )
+            input["suchThat"][iVal]
             output += f"""
     #avg
     for row in rows:
@@ -107,7 +146,7 @@ def generate(aggType, iVal, vectVal):
         for key, value in mfTable.items():
             if {conds}:
                 if {input["suchThat"][iVal]}:
-                    value.count ++
+                    value.count = value.count + 1
                     value._{vectVal} = value.count
                     #return
             """
@@ -122,7 +161,7 @@ def generate(aggType, iVal, vectVal):
     for row in rows:
         for key, value in mfTable.items():
             if {conds}:
-                if {input["suchThat"][iVal][2:]}:
+                if {input["suchThat"][iVal]}:
                     value.max = max(value.max, row["quant"])
                     value._{vectVal} = value.max
                     #return
@@ -149,12 +188,21 @@ def generate(aggType, iVal, vectVal):
     
 
 
-def main():
+def main(theInput):
+    global input
+    input = theInput
     """
     This is the generator code. It should take in the MF structure and generate the code
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
+    #input = {'select': ['cust', '1_avg_quant', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['cust'], 'f_vect': ['1_avg_quant', '2_avg_quant'], 'suchThat': ['row["state"] == \'NY\'', 'row["state"] == \'NJ\''], 'having': ['TRUE']}
+    
+    #hardcoded in sample 6
+    input = {'select': ['cust', 'prod', '1_avg_quant', '2_min_quant'], 'n': '2', 'groupingAttribute': ['cust', 'prod'], 'f_vect': ['1_avg_quant', '2_min_quant'], 'suchThat': ['row["state"]==\'NY\'', 'row["state"]==\'NY\' and row["quant"] > value._1_avg_quant'], 'having': ['1_avg_quant_ny >= 200']}
+
+    #print(input)
+    
     mfValue = "[";
     for i in range (int(input["n"])):
         mfValue += "0, "
@@ -319,6 +367,7 @@ def query():
 
 def main():
     print(query())
+
     
 if "__main__" == __name__:
     main()
@@ -331,7 +380,10 @@ if "__main__" == __name__:
 
 
 if "__main__" == __name__:
-    main()
+    main(None)
+
+def runMain(theInput):
+    main(theInput)
 
 """
     def howIdDoIt():

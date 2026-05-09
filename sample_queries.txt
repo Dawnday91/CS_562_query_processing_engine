@@ -1,32 +1,94 @@
- SELECT ATTRIBUTE(S):
-    cust, 1_avg_price, 2_sum_quant, 3_min_quant
-    NUMBER OF GROUPING VARIABLES(n):
-    3
-    GROUPING ATTRIBUTES(V):
+SELECT ATTRIBUTE(S):
+    cust, 1_avg_quant, 2_avg_quant
+NUMBER OF GROUPING VARIABLES(n):
+    2
+GROUPING ATTRIBUTES(V):
     cust
-    F-VECT([F]):
-    1_avg_price, 2_sum_quant, 3_min_quant
-    SELECT CONDITION-VECT([σ]):
-    1.state='CA' and  1.year = 2023 and 1.region = 'east'
-    2.state='TX' and  2.year = 2023 and 2.region = 'east'
-    3.state='FL' and  3.year = 2023 and 3.region = 'east'
-    HAVING_CONDITION(G):
-    2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5
-    END
+F-VECT([F]):
+    1_avg_quant, 2_avg_quant
+SELECT CONDITION-VECT([σ]):
+    1.state = 'NY'
+    2.state = 'NJ'
+HAVING_CONDITION(G):
+   TRUE
+   END
+
+SELECT ATTRIBUTE(S):
+    prod, 1_sum_sales, 2_count_sales, 3_min_sales
+NUMBER OF GROUPING VARIABLES(n):
+    3
+GROUPING ATTRIBUTES(V):
+    prod
+F-VECT([F]):
+    1_sum_sales, 2_count_sales, 3_min_sales
+SELECT CONDITION-VECT([σ]):
+    1.day > 10
+    2.month = 7
+    3.year < 2018
+HAVING_CONDITION(G):
+    TRUE
+END
+
+SELECT ATTRIBUTE(S):
+    prod, 1_avg_quant, 2_avg_quant
+NUMBER OF GROUPING VARIABLES(n):
+    2
+GROUPING ATTRIBUTES(V):
+    prod
+F-VECT([F]):
+    1_avg_quant, 2_avg_quant
+SELECT CONDITION-VECT([σ]):
+    1.cust = 'Dan' and 1.state = 'NY'
+    2.cust = 'Dan' and 2.month <= 6
+HAVING_CONDITION(G):
+    TRUE
+END
 
 
- SELECT ATTRIBUTE(S):
-    cust, 1_avg_price, 2_sum_quant, 3_min_quant
-    NUMBER OF GROUPING VARIABLES(n):
-    3
-    GROUPING ATTRIBUTES(V):
-    cust
-    F-VECT([F]):
-    1_avg_price, 2_sum_quant, 3_min_quant
-    SELECT CONDITION-VECT([σ]):
-    1.state='CA' and  1.year = 2023 and 1.region = 'east'
-    2.state='TX' and  2.year = 2023 and 2.region = 'east'
-    3.state='FL' and  3.year = 2023 and 3.region = 'east'
-    HAVING_CONDITION(G):
-    2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5
-    END
+
+SELECT ATTRIBUTE(S):
+    cust, prod, 1_avg_quant, 2_avg_quant
+NUMBER OF GROUPING VARIABLES(n):
+    2
+GROUPING ATTRIBUTES(V):
+    cust, prod
+F-VECT([F]):
+    1_avg_quant, 2_avg_quant
+SELECT CONDITION-VECT([σ]):
+    1.state='NY'
+    2.month=1
+HAVING_CONDITION(G):
+    TRUE
+END
+
+SELECT ATTRIBUTE(S):
+    prod, cust, 1_count_sales, 2_avg_quant
+NUMBER OF GROUPING VARIABLES(n):
+    2
+GROUPING ATTRIBUTES(V):
+    prod, cust
+F-VECT([F]):
+    1_count_sales, 2_avg_quant
+SELECT CONDITION-VECT([σ]):
+    1.state='NY'
+    2.state='NY'
+HAVING_CONDITION(G):
+    2_avg_quant >= 100
+END
+
+SELECT ATTRIBUTE(S):
+    cust, prod, 1_avg_quant, 2_min_quant
+NUMBER OF GROUPING VARIABLES(n):
+    2
+GROUPING ATTRIBUTES(V):
+    cust, prod
+F-VECT([F]):
+    1_avg_quant, 2_min_quant
+SELECT CONDITION-VECT([σ]):
+    1.state='NY'
+    2.state='NY' and 2.quant > 1_avg_quant
+HAVING_CONDITION(G):
+    1_avg_quant_ny >= 200
+END
+
+

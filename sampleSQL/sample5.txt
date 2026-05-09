@@ -1,0 +1,9 @@
+SELECT
+    cust,
+    prod,
+    COUNT(*) AS count_sales,
+    AVG(quant) AS avg_quant
+FROM sales
+WHERE state = 'NY'
+GROUP BY cust, prod
+HAVING AVG(quant) >= 100;

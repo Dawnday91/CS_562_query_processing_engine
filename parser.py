@@ -42,6 +42,7 @@ def parseInput(item):
                     if item.strip()
                 ]
             elif key == "suchThat":
+                the = []
                 queryLine[key] = [
                     suchthatStruct(v)
                     for v in values

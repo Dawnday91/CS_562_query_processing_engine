@@ -4,6 +4,7 @@ import psycopg2.extras
 import tabulate
 from parser import write_output, UserInput
 from dotenv import load_dotenv
+from generator import runMain
 
 
 def query():
@@ -28,13 +29,14 @@ def main():
     queries = UserInput()
 
     for stored_query in queries:
-        print(stored_query)
+        #print(stored_query)
 
-        print("Parsed dict:")
-        print(stored_query)
+        runMain(stored_query)
+        #print("Parsed dict:")
+        #print(stored_query)
 
-        print("\nGenerated query:")
-        print(write_output(stored_query))
+        #print("\nGenerated query:")
+        #print(write_output(stored_query))
 
 
 if "__main__" == __name__:

@@ -1,0 +1,23 @@
+WITH ny AS (
+    SELECT
+        cust,
+        AVG(quant) AS avg_quant_ny
+    FROM sales
+    WHERE state = 'NY'
+    GROUP BY cust
+),
+nj AS (
+    SELECT
+        cust,
+        AVG(quant) AS avg_quant_nj
+    FROM sales
+    WHERE state = 'NJ'
+    GROUP BY cust
+)
+SELECT
+    COALESCE(ny.cust, nj.cust) AS cust,
+    ny.avg_quant_ny,
+    nj.avg_quant_nj
+FROM ny
+FULL OUTER JOIN nj
+    ON ny.cust = nj.cust;

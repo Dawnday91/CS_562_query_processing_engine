@@ -1,6 +1,6 @@
 
 #test test hello
-['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant']
+['cust', 'prod', '1_avg_quant', '2_min_quant']
 import os
 import psycopg2
 import psycopg2.extras
@@ -54,10 +54,9 @@ def query():
 
     
     class Row:
-        def __init__(self,_1_avg_price=0,_2_sum_quant=0,_3_min_quant=float('inf')):
-            self._1_avg_price = _1_avg_price
-            self._2_sum_quant = _2_sum_quant
-            self._3_min_quant = _3_min_quant
+        def __init__(self,_1_avg_quant=0,_2_min_quant=float('inf')):
+            self._1_avg_quant = _1_avg_quant
+            self._2_min_quant = _2_min_quant
 
             self.sum = 0
             self.count = 0
@@ -69,8 +68,8 @@ def query():
             return f"Row({attrs})"
 
 
-    mfValue = [0, 0, 0] 
-    #int n = 3
+    mfValue = [0, 0] 
+    #int n = 2
 
     #generate mf table
 
@@ -95,26 +94,10 @@ def query():
     for row in rows:
         for key, value in mfTable.items():
             if key.cust == row['cust'] and key.prod == row['prod']: #if row matches key
-                if row['state'] == 'CT': #if we satisfy suchThat
+                if row["state"]=='NY': #if we satisfy suchThat
                     value.sum += row["quant"] #compute aggregate
                     value.count += 1
-                    value._1_avg_price = value.sum / value.count
-                    #return
-            
-            
-    for key, value in mfTable.items():
-        value.sum = 0
-        value.count = 0
-        value.min = float('inf')
-        value.max = float('-inf')
-    
-    #sum
-    for row in rows:
-        for key, value in mfTable.items():
-            if key.cust == row['cust'] and key.prod == row['prod']:
-                if row['quant'] > value._1_avg_price:
-                    value.sum += row["quant"]
-                    value._2_sum_quant = value.sum
+                    value._1_avg_quant = value.sum / value.count
                     #return
             
             
@@ -128,21 +111,21 @@ def query():
     for row in rows:
         for key, value in mfTable.items():
             if key.cust == row['cust'] and key.prod == row['prod']:
-                if row['state'] == 'NJ':
+                if row["state"]=='NY' and row["quant"] > value._1_avg_quant:
                     value.min = min(value.min, row["quant"])
-                    value._3_min_quant = value.min
+                    value._2_min_quant = value.min
                     #return
             
     #having
     theOutput = []
     for key, value in mfTable.items():
-        if value._2_sum_quant > 0:
+        if ['1_avg_quant_ny >= 200']:
             theOutput.append((key, value))
 
     outputFR = []
     for key, value in theOutput:
         theRow = []
-        for attr in ['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant']:
+        for attr in ['cust', 'prod', '1_avg_quant', '2_min_quant']:
             if attr in ['cust', 'prod']:
                 theRow.append(getattr(key, attr))
             else:
@@ -152,11 +135,12 @@ def query():
     
     
     return tabulate.tabulate(outputFR,
-                        headers=['cust', 'prod', '1_avg_price', '2_sum_quant', '3_min_quant'], tablefmt="psql")
+                        headers=['cust', 'prod', '1_avg_quant', '2_min_quant'], tablefmt="psql")
 
 
 def main():
     print(query())
+
     
 if "__main__" == __name__:
     main()

@@ -1,0 +1,7 @@
+SELECT
+    prod,
+    AVG(CASE WHEN state = 'NY' THEN quant END) AS avg_quant_ny,
+    AVG(CASE WHEN month <= 6 THEN quant END) AS avg_quant_first_half
+FROM sales
+WHERE cust = 'Dan'
+GROUP BY prod;
