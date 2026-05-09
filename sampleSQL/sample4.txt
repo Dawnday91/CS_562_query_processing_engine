@@ -1,0 +1,7 @@
+SELECT
+    cust,
+    prod,
+    AVG(CASE WHEN state = 'NY' THEN quant END) AS avg_quant_ny,
+    AVG(CASE WHEN month = 1 THEN quant END) AS avg_quant_jan
+FROM sales
+GROUP BY cust, prod;

@@ -45,7 +45,9 @@ def normalizeItems(item):
     return token.genVer if token else item
 
 def suchthatStruct(item):
-    return re.sub(r"(\d+)\.([a-zA-Z_]\w*)",r'row["\2"]',item)
+    item = re.sub(r"(\d+)\.([a-zA-Z_]\w*)",r'row["\2"]',item)
+    item = re.sub(r'(?<![<>=!])=(?!=)', '==', item)
+    return item
 
 def havingStruct(item):
     return re.sub(

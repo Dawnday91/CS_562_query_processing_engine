@@ -1,0 +1,15 @@
+SELECT ATTRIBUTE(S):
+    prod, 1_sum_sales, 2_count_sales, 3_min_sales
+NUMBER OF GROUPING VARIABLES(n):
+    3
+GROUPING ATTRIBUTES(V):
+    prod
+F-VECT([F]):
+    1_sum_sales, 2_count_sales, 3_min_sales
+SELECT CONDITION-VECT([σ]):
+    1.day > 10
+    2.month = 7
+    3.year < 2018
+HAVING_CONDITION(G):
+    TRUE
+END

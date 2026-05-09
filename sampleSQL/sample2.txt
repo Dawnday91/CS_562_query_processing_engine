@@ -1,0 +1,34 @@
+WITH sum_after_10 AS (
+    SELECT
+        prod,
+        SUM(quant) AS sum_quant_after_10
+    FROM sales
+    WHERE day > 10
+    GROUP BY prod
+),
+count_month_7 AS (
+    SELECT
+        prod,
+        COUNT(*) AS count_month_7
+    FROM sales
+    WHERE month = 7
+    GROUP BY prod
+),
+min_before_2018 AS (
+    SELECT
+        prod,
+        MIN(quant) AS min_quant_before_2018
+    FROM sales
+    WHERE year < 2018
+    GROUP BY prod
+)
+SELECT
+    COALESCE(sum_after_10.prod, count_month_7.prod, min_before_2018.prod) AS prod,
+    sum_after_10.sum_quant_after_10,
+    count_month_7.count_month_7,
+    min_before_2018.min_quant_before_2018
+FROM sum_after_10
+FULL OUTER JOIN count_month_7
+    ON sum_after_10.prod = count_month_7.prod
+FULL OUTER JOIN min_before_2018
+    ON COALESCE(sum_after_10.prod, count_month_7.prod) = min_before_2018.prod;

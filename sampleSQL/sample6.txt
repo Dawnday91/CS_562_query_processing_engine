@@ -1,0 +1,33 @@
+WITH ny AS (
+    SELECT cust, prod, quant
+    FROM sales
+    WHERE state = 'NY'
+),
+avg_table AS (
+    SELECT
+        cust,
+        prod,
+        AVG(quant) AS avg_quant_ny
+    FROM ny
+    GROUP BY cust, prod
+),
+min_gt_avg AS (
+    SELECT
+        n.cust,
+        n.prod,
+        MIN(n.quant) AS min_quant_gt_avg
+    FROM ny n
+    JOIN avg_table a
+      ON a.cust = n.cust AND a.prod = n.prod
+    WHERE n.quant > a.avg_quant_ny
+    GROUP BY n.cust, n.prod
+)
+SELECT
+    a.cust,
+    a.prod,
+    a.avg_quant_ny,
+    m.min_quant_gt_avg
+FROM avg_table a
+LEFT JOIN min_gt_avg m
+  ON a.cust = m.cust AND a.prod = m.prod
+WHERE a.avg_quant_ny >= 200;
