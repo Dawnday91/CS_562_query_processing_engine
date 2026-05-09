@@ -1,0 +1,21 @@
+once code is run and you are in your venv
+    -> that is, your command line looks something like
+        ->(venv) PS C:\Users\...\CS_562_query_processing_engine> 
+
+run "python sql.py"
+you will be prompted to choose input method. enter "1" or "2"
+pressin 1 (manual input)
+
+pressing 2 (file input)
+    -> you will be prompted to enter file path. enter the path to the txt file with the query you want. ("sample1.txt")
+
+run "python _generated.py"
+
+
+IF YOU WANT TO RUN SAMPLE 6
+    -> sample6 is a unique case because it contains "2.quant > 1_avg_quant". 
+        this does not parse properly. the correct output if it were coded properly is 
+        located under the comment "#hardcoded in sample 6" if you uncomment out input line,
+        input will be overrided with the correct test case to demonstrate this clause is runnable.
+
+        you can view and compare the incorrect and correct output of the files under the comment "#sample query 6"

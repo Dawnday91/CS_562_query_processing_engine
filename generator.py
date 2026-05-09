@@ -56,8 +56,10 @@ input = {
 }
 
 #sample query 1
-#for each customer, get the customer, average quant where state is NY, and average quanti where state is NJ
+#for each customer, 
+#   get the customer, average quant where state is NY, and average quant where state is NJ
 input = {'select': ['cust', '1_avg_quant', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['cust'], 'f_vect': ['1_avg_quant', '2_avg_quant'], 'suchThat': ['row["state"] == \'NY\'', 'row["state"] == \'NJ\''], 'having': ['TRUE']}
+
 #sample query 2
 #for each product, compute the sum of sales when the day is after the 10th, the count of sales when the month is the 7th, and the minimum of sales when the year is before 2018
 input = {'select': ['prod', '1_sum_sales', '2_count_sales', '3_min_sales'], 'n': '3', 'groupingAttribute': ['prod'], 'f_vect': ['1_sum_sales', '2_count_sales', '3_min_sales'], 'suchThat': ['row["day"] > 10', 'row["month"] == 7', 'row["year"] < 2018'], 'having': ['TRUE']}
@@ -199,7 +201,7 @@ def main(theInput):
     #input = {'select': ['cust', '1_avg_quant', '2_avg_quant'], 'n': '2', 'groupingAttribute': ['cust'], 'f_vect': ['1_avg_quant', '2_avg_quant'], 'suchThat': ['row["state"] == \'NY\'', 'row["state"] == \'NJ\''], 'having': ['TRUE']}
     
     #hardcoded in sample 6
-    input = {'select': ['cust', 'prod', '1_avg_quant', '2_min_quant'], 'n': '2', 'groupingAttribute': ['cust', 'prod'], 'f_vect': ['1_avg_quant', '2_min_quant'], 'suchThat': ['row["state"]==\'NY\'', 'row["state"]==\'NY\' and row["quant"] > value._1_avg_quant'], 'having': ['1_avg_quant_ny >= 200']}
+    #input = {'select': ['cust', 'prod', '1_avg_quant', '2_min_quant'], 'n': '2', 'groupingAttribute': ['cust', 'prod'], 'f_vect': ['1_avg_quant', '2_min_quant'], 'suchThat': ['row["state"]==\'NY\'', 'row["state"]==\'NY\' and row["quant"] > value._1_avg_quant'], 'having': ['1_avg_quant_ny >= 200']}
 
     #print(input)
     
