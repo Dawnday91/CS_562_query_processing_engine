@@ -1,32 +1,31 @@
- SELECT ATTRIBUTE(S):
-    cust, 1_avg_price, 2_sum_quant, 3_min_quant
-    NUMBER OF GROUPING VARIABLES(n):
-    3
-    GROUPING ATTRIBUTES(V):
-    cust
-    F-VECT([F]):
-    1_avg_price, 2_sum_quant, 3_min_quant
-    SELECT CONDITION-VECT([σ]):
-    1.state='CA' and  1.year = 2023 and 1.region = 'east'
-    2.state='TX' and  2.year = 2023 and 2.region = 'east'
-    3.state='FL' and  3.year = 2023 and 3.region = 'east'
-    HAVING_CONDITION(G):
-    2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5
-    END
+SELECT ATTRIBUTE(S):
+cust, 1_avg_price, 2_sum_quant, 3_min_quant
+NUMBER OF GROUPING VARIABLES(n):
+3
+GROUPING ATTRIBUTES(V):
+cust
+F-VECT([F]):
+1_avg_price, 2_sum_quant, 3_min_quant
+SELECT CONDITION-VECT([σ]):
+1.state='CA' and  1.year = 2023 and 1.region = 'east'
+2.state='TX' and  2.year = 2023 and 2.region = 'east'
+3.state='FL' and  3.year = 2023 and 3.region = 'east'
+HAVING_CONDITION(G):
+2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5
+END
 
 
- SELECT ATTRIBUTE(S):
-    cust, 1_avg_price, 2_sum_quant, 3_min_quant
-    NUMBER OF GROUPING VARIABLES(n):
-    3
-    GROUPING ATTRIBUTES(V):
-    cust
-    F-VECT([F]):
-    1_avg_price, 2_sum_quant, 3_min_quant
-    SELECT CONDITION-VECT([σ]):
-    1.state='CA' and  1.year = 2023 and 1.region = 'east'
-    2.state='TX' and  2.year = 2023 and 2.region = 'east'
-    3.state='FL' and  3.year = 2023 and 3.region = 'east'
-    HAVING_CONDITION(G):
-    2_sum_quant > 100 or 1_avg_price < 50 and 3_min_quant >= 5
-    END
+SELECT ATTRIBUTE(S):
+product, month, 1_avg_quantity, 2_avg_quantity
+NUMBER OF GROUPING VARIABLES(n):
+2
+GROUPING ATTRIBUTES(V):
+product, month
+F-VECT([F]):
+1_avg_quantity, 2_avg_quantity
+SELECT CONDITION-VECT([σ]):
+1.product = product and 1.month = month and 1.year = 1997
+2.product = product and 2.month <> month and 2.year = 1997
+HAVING_CONDITION(G):
+1_avg_quantity > 2_avg_quantity
+END
